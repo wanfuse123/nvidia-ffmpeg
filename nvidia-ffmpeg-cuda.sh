@@ -21,7 +21,7 @@ function apt_install_Program_Requirements() {
 printf "The following packages install will muck with your nvidia settings. Please review output and note carefully what it is doing "
 read -r -p "Press any key to continue then press enter  y  to acknowledge... " -n1 -s
 
-DEBIAN_FRONTEND=noninteractive apt-get install wget tar build-essential yasm cmake libtool libc6 libc6-dev unzip wget libnuma1 libnuma-dev dav1d libdav1d-dev libdav1d5 clang-14 clang-tools-14 libunistring-dev libaom-dev libdav1d-dev libx264-dev libx265-dev libnuma-dev libvpx-dev libopus-dev autoconf \
+DEBIAN_FRONTEND=noninteractive apt-get install wget tar build-essential yasm cmake libtool libc6 libc6-dev unzip wget libnuma1 libnuma-dev dav1d libdav1d-dev libdav1d5 clang-14 clang-tools-14 libunistring-dev libaom-dev libdav1d-dev libx264-dev libx265-dev libnuma-dev libvpx-dev libopus-dev autoconf gnutls-bin\
   automake \
   build-essential \
   cmake \
@@ -46,7 +46,17 @@ DEBIAN_FRONTEND=noninteractive apt-get install wget tar build-essential yasm cma
   nvidia-utils-510 \
   nvidia-cuda-dev \
   libnvidia-encode-510 \
-  curl
+  curl \
+  coreutils \
+  gnutls-bin \
+  libunistring-dev \
+  libgnutls28-dev \
+  libsvtav1-dev \
+  libsvtav1dec-dev \
+  libsvtav1dec0 \
+  libsvtav1enc-dev \
+  libsvtav1enc0
+
   
   # libfdk-aac-dev
   
@@ -80,6 +90,13 @@ cmake .. -G"Unix Makefiles" -DCMAKE_BUILD_TYPE=Release
 make -j "$(nproc)*2"
 make install
 
+pushd "$basedir" || printf 'cannot change to the basdir \n'
+wget "http://downloads.sourceforge.net/project/lame/lame/3.99/lame-3.99.5.tar.gz"
+tar zxfv lame-3.99.5.tar.gz
+pushd lame-3.99.5
+./configure
+make -j "$(nproc)*2"
+sudo make install
 
 
 # OR
@@ -2219,7 +2236,7 @@ printf 'sleeping.. \n'
 pushd "$ffmpegdir" || printf "could not change to to tmp directory %s \n" "$ffmpegdir"
 
 PATH=$PATH:/usr/local/cuda/bin 
-$ffmpegdir/./configure   --enable-gpl --enable-gnutls --enable-libaom --enable-libass --enable-libfreetype --enable-libmp3lame --enable-libopus --enable-libsvtav1 --enable-libvorbis --enable-libvpx --enable-libx264 --enable-filter=scale_cuda --enable-libx265  --nvcc=clang-14 --enable-nvenc  --enable-cuvid --enable-ffnvcodec
+$ffmpegdir/./configure   --enable-gpl --enable-gnutls --enable-libaom --enable-libass --extra-libs="-lpthread -lm" --extra-ldflags=-L/usr/local/lib --enable-libfreetype --enable-libmp3lame --enable-libopus --enable-libsvtav1 --enable-libvorbis --enable-libvpx --enable-libx264 --enable-filter=scale_cuda --enable-libx265  --nvcc=clang-14 --enable-nvenc  --enable-cuvid --enable-ffnvcodec
 
 
 # --enable-cuda-sdk
